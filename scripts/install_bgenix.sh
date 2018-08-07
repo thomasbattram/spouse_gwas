@@ -6,8 +6,8 @@ tar -zxvf master.tar.gz
 
 # Configure and build
 cd gavinband-bgen-d1f03a2c308a
-./waf-1.8.13 configure
-./waf-1.8.13
+./waf configure
+./waf
 
 # bgenix will be installed in build/apps/bgenix
 
