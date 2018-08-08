@@ -30,12 +30,6 @@ do
 qctool -g data/temp_genotypes.${i}.bgen -og data/temp_SNPs.${i}.bed
 done
 
-# extract snps from biobank maf data
-bio_dat=/panfs/panasas01/dedicated-mrcieu/research/data/ukbiobank/_latest/UKBIOBANK_Array_Genotypes_500k_HRC_Imputation/data/derived/filtered/hrc-only/all/snp_lists
-grep -hf $snp_list $bio_dat/data.all_hrc_snps.tab > data/snp_pos.txt
-wc -l data/snp_pos.txt # many more than 382... - check in R if this can be sorted
-
-
 gd=/panfs/panasas01/shared-biobank/data/bestguess
 
 grep -hf $snp_list $gd/*.bim > data/snp_pos.txt
