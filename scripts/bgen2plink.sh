@@ -17,7 +17,7 @@ temp_prefix=temp_genotypes
 for chrom in {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22}; do
     inbgen=${bgen_pattern/CHROM/$chrom}
     inbgenidx=${bgen_index_pattern/CHROM/$chrom}
-    ~/programs/gavinband-bgen-0b7a2803adb5/build/apps/bgenix -g $inbgen -i $inbgenidx -incl-rsids $snp_list -v11 > data/$temp_prefix.$chrom.bgen
+    ~/programs/gavinband-bgen-0b7a2803adb5/build/apps/bgenix -g $inbgen -i $inbgenidx -incl-rsids $snp_list -v11 > data/bgen/$temp_prefix.$chrom.bgen
 done
 
 #Use QCtools to convert to plink format
@@ -27,8 +27,10 @@ declare -a arr=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15
 
 for i in "${arr[@]}"
 do
-qctool -g data/temp_genotypes.${i}.bgen -og data/temp_SNPs.${i}.bed
+qctool -g data/bgen/temp_genotypes.${i}.bgen -og data/binary/temp_SNPs.${i}.bed
 done
+
+module rm apps/qctool-1.4
 
 gd=/panfs/panasas01/shared-biobank/data/bestguess
 
@@ -38,11 +40,3 @@ wc -l data/snp_pos.txt # many more than 382... - check in R if this can be sorte
 
 #Also will need the idlist to link the IDs to the genotype files, they are in the same order so just paste across and then remove columns in R or unix 
 Rscript scripts/make_fam.R
-
-paste ~/spouse_gwas/idlist file.fam > linkedfile.fam
-
-R
-input <- read.table("~/spouse_gwas/linked_height_SNPs.fam")
-output <- input[c(1, 1, 4:7)]
-
-write.table(output, "~/spouse_gwas/height_SNPs.fam", sep=" ", quote=F, row.names=F, col.names=F)
