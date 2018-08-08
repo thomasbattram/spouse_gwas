@@ -35,6 +35,13 @@ bio_dat=/panfs/panasas01/dedicated-mrcieu/research/data/ukbiobank/_latest/UKBIOB
 grep -hf $snp_list $bio_dat/data.all_hrc_snps.tab > data/snp_pos.txt
 wc -l data/snp_pos.txt # many more than 382... - check in R if this can be sorted
 
+
+gd=/panfs/panasas01/shared-biobank/data/bestguess
+
+grep -hf $snp_list $gd/*.bim > data/snp_pos.txt
+wc -l data/snp_pos.txt # many more than 382... - check in R if this can be sorted
+
+
 #Also will need the idlist to link the IDs to the genotype files, they are in the same order so just paste across and then remove columns in R or unix 
 Rscript scripts/make_fam.R
 
