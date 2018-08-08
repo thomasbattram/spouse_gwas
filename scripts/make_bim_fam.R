@@ -27,7 +27,7 @@ fam <- pairs %>%
 	mutate(IID = genID) %>%
 	mutate(PID = 0) %>%
 	mutate(MID = 0) %>%
-	mutate(SEX = as.factor(sex)) %>%
+	mutate(SEX = as.factor(Sex)) %>%
 	mutate(PHENO = 0) %>%
 	dplyr::select(FID, IID, PID, MID, SEX, PHENO)
 
@@ -55,5 +55,8 @@ bim <- snps %>%
 
 bim
 
+for (i in 1:22) {
+	
+}
 
 
