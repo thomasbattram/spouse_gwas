@@ -9,8 +9,13 @@ setwd("~/spouse_gwas")
 pkgs <- c("tidyverse")
 lapply(pkgs, require, character.only = T)
 
+devtools::load_all("~/repos/usefunc/")
+
 pairs <- read_delim("data/spouse_pairs.txt", delim = " ")
 snps <- read_delim("data/height_mr_dataset.txt", delim = " ")
+snps2 <- read_delim("data/snp_pos.txt", delim = "\t", col_names = F)
+colnames(snps2) <- c("CHR", "SNP", "GD", "POS", "A1", "A2")
+
 # ------------------------------------------------
 # Make fam file
 # ------------------------------------------------
@@ -43,20 +48,17 @@ fam <- pairs %>%
 # --	--    -- --  -- --
 # --	--    -- --  -- --
 
-filepath <- "/panfs/panasas01/shared/alspac/studies/latest/alspac/genetic/variants/arrays/gwas/imputed/1000genomes/released/2015-10-30/data/derived/filtered/bestguess/maf0.01_info0.8/combined"
-
-als_bim <- read_delim(paste0(filepath, "/data.bim"), delim = "\t", col_names = F)
-colnames(als_bim) <- c("CHR", "SNP", "GD", "POS", "A1", "A2")
 bim <- snps %>%
-	left_join(als_bim) %>% 
+	left_join(snps2) %>%
 	mutate(A1 = effect_allele.exposure) %>%
 	mutate(A2 = other_allele.exposure) %>%
 	dplyr::select(CHR, SNP, GD, POS, A1, A2)
 
-bim
-
 for (i in 1:22) {
-	
-}
+	temp_bim <- bim %>%
+		dplyr::filter(CHR == i)
 
+	write.table(temp_bim, file = paste0("data/binary/temp_SNPs.", i, ".bim"), quote = F, col.names = F, row.names = F)
+	write.table(fam, file = paste0("data/binary/temp_SNPs.", i, ".fam"), quote = F, col.names = F, row.names = F)
+}
 
