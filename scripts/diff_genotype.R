@@ -6,7 +6,7 @@ rm(list = ls())
 
 setwd("~/spouse_gwas")
 
-pkgs <- c("tidyverse")
+pkgs <- c("tidyverse", "conflicted")
 lapply(pkgs, require, character.only = T)
 
 devtools::load_all("~/repos/usefunc/")
@@ -24,24 +24,28 @@ str(res)
 
 snps <- grep("rs[0-9]", colnames(res), value = T)
 
-test <- res[1:20,]
+test <- res[1:20, ] %>%
+	arrange(Sex) # arranging by sex ensures when looking at duplicates you pick out all males/females
 
-dupval <- duplicated(test$Couple)
+dupval <- duplicated(test$Couple) # duplicated values = couples
 
-test_c1 <- test[dupval,]
+# Extract one from each couple
+test_c1 <- test[dupval, ] 
 colnames(test_c1[snps]) <- paste0(colnames(test_c1[snps]), "_c1")
-test_c2 <- test[!dupval,]
+test_c2 <- test[!dupval, ]
 colnames(test_c2[snps]) <- paste0(colnames(test_c2[snps]), "_c2")
 stopifnot(test_c1$Couple == test_c2$Couple)
 
-test_diff <- test[dupval,]
+test_diff <- test[dupval, ]
 colnames(test_diff[snps]) <- paste0(colnames(test_diff[snps]), "_diff")
 
+# Minus test couple 1 from test couple 2
 test_diff[, -c(1:11)] <- test_c1[,-c(1:11)] - test_c2[,-c(1:11)]
 colnames(test_diff[, -c(1:11)]) <- paste0(colnames(test_diff[, -c(1:11)]), "_diff")
 colnames(test_diff)
 # START FROM HERE!!!!!!
-
+summary(test_diff[,12:20])
+test_diff[, -c(1:11)] <- 
 
 
 fin_dat <- list()
