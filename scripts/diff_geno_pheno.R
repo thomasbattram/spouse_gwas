@@ -1,5 +1,5 @@
 # ------------------------------------------------
-# generating the genotype for gwas 
+# generating the difference files for gwas 
 # ------------------------------------------------
 
 rm(list = ls())
