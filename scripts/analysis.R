@@ -42,8 +42,23 @@ res_sig <- res %>%
 
 # read in actual gwas for comparison
 height_gwas <- read_table("data/output/Height-Height.conventional.Height.assoc.linear")
+height_gwas <- height_gwas %>%
+	mutate(snp = SNP) %>%
+	mutate(estimate = BETA) %>%
+	mutate(se = SE) %>%
+	mutate(p = P) %>%
+	mutate(CI_low = gsub(" .*", "", head(height_gwas[["L95      U95"]]))) %>%
+	mutate(CI_high = gsub("*. ", "", head(height_gwas[["L95      U95"]])))  
+
+gsub("*", "", head(height_gwas[["L95      U95"]]))
 
 # join data together - probs do it so they're side by side then remove everything but beta, se, p, l95, u95 for both 
+head(fin_dat)
+
+fin_dat <- res_sig %>%
+	left_join(height_gwas, by = c("snp" = "SNP"))
+
+
 
 # use a plot to compare - try forest?
 
