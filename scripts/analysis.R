@@ -38,7 +38,9 @@ res <- as.data.frame(res) %>%
 	mutate(snp = gsub("_[ACTG]", "", snp))
 
 res_sig <- res %>%
-	dplyr::filter(p < 0.05)
+	dplyr::filter(p < 0.05) %>%
+	dplyr::select(-outcome, -adj_r2) %>%
+	mutate(mod = "spouse_only")
 
 # read in actual gwas for comparison
 height_gwas <- read_table("data/output/Height-Height.conventional.Height.assoc.linear")
@@ -46,17 +48,20 @@ height_gwas <- height_gwas %>%
 	mutate(snp = SNP) %>%
 	mutate(estimate = BETA) %>%
 	mutate(se = SE) %>%
-	mutate(p = P) %>%
-	mutate(CI_low = gsub(" .*", "", head(height_gwas[["L95      U95"]]))) %>%
-	mutate(CI_high = gsub("*. ", "", head(height_gwas[["L95      U95"]])))  
+	mutate(p = P) %>% 
+	mutate(mod = "conventional") %>%
+	separate(`L95      U95`, into = c("CI_low", "CI_up"), sep = "\\s+") %>%
+	dplyr::select(snp, estimate, se, p, CI_low, CI_up, mod)
 
-gsub("*", "", head(height_gwas[["L95      U95"]]))
+
 
 # join data together - probs do it so they're side by side then remove everything but beta, se, p, l95, u95 for both 
+
+fin_dat <- rbind(res_sig, height_gwas)
 head(fin_dat)
 
-fin_dat <- res_sig %>%
-	left_join(height_gwas, by = c("snp" = "SNP"))
+# fin_dat <- res_sig %>%
+# 	left_join(height_gwas, by = c("snp" = "SNP"))
 
 
 
