@@ -6,12 +6,12 @@ rm(list = ls())
 
 setwd("~/spouse_gwas")
 
-pkgs <- c("tidyverse", "conflicted")
+pkgs <- c("tidyverse", "conflicted", "data.table")
 lapply(pkgs, require, character.only = T)
 
 devtools::load_all("~/repos/usefunc/")
 
-dat <- read.table("data/merged_dat_recode.raw", header = T)
+dat <- fread("data/merged_dat_recode.raw", header = T)
 pairs <- read.table("data/spouse_pairs_height_chd.txt", header = T)
 bim <- read_bim("data/binary/merged_dat")
 

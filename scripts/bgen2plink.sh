@@ -21,6 +21,7 @@ for chrom in {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22}; do
 done
 
 #Use QCtools to convert to plink format
+module rm apps/qctool-1.4
 module add apps/qctool-2.0
 
 declare -a arr=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22")
@@ -29,8 +30,6 @@ for i in "${arr[@]}"
 do
 qctool -g data/bgen/temp_genotypes.${i}.bgen -og data/binary/temp_SNPs.${i}.bed
 done
-
-module rm apps/qctool-1.4
 
 gd=/panfs/panasas01/shared-biobank/data/bestguess
 
