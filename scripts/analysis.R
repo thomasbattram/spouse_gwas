@@ -54,7 +54,24 @@ g_dat <- height_gwas %>%
 	dplyr::select(snp, estimate, se, p, CI_low, CI_up, mod) %>%
 	dplyr::filter(snp %in% res_sig$snp)
 
+# Allele check
+sp_a1 <- gsub(".*_", "", snps)
+sp_snp <- gsub("_.*", "", snps)
+temp <- data.frame(snp = sp_snp, sp_a1)
+al_check <- temp %>%
+	left_join(height_gwas, by = c("snp" = "SNP")) %>%
+	dplyr::select(snp, sp_a1, A1) 
 
+al_diff <- al_check[al_check$sp_a1 != al_check$A1, "snp"]
+
+dplyr::filter(g_dat, snp %in% al_diff)
+for (i in g_dat$snp) {
+	if (i %in% al_diff) {
+		print(i)
+		g_dat[g_dat$snp == i, "estimate"] <- g_dat[g_dat$snp == i, "estimate"] * -1
+	}
+}
+dplyr::filter(g_dat, snp %in% al_diff)
 
 # join data together - probs do it so they're side by side then remove everything but beta, se, p, l95, u95 for both 
 
@@ -67,6 +84,7 @@ fin_dat <- fin_dat %>%
 	mutate(`2.5 %` = as.numeric(CI_low)) %>%
 	mutate(`97.5 %` = as.numeric(CI_up)) %>%
 	mutate(Estimate = estimate) %>%
+	dplyr::select(-estimate, -CI_up, -CI_low) %>%
 	arrange(snp)
 
 formals(forest_plot)
@@ -75,7 +93,6 @@ fplot <- forest_plot(fin_dat, col_num = 6, group = "mod", y_axis = "snp", null_a
 
 ggsave("data/output/height_comp.pdf", plot = fplot, width = 15, height = 10, units = "in")
 
-
 spo_est <- fin_dat[fin_dat$mod == "spouse_only", "Estimate"]
 con_est <- fin_dat[fin_dat$mod == "conventional", "Estimate"]
 
@@ -83,6 +100,8 @@ est_diff <- con_est - spo_est
 
 hdat <- data.frame(snp = unique(fin_dat$snp), spo_est, con_est, est_diff)
 
+
+rm(list = c("spo_est", "con_est", "est_diff"))
 hplot <- ggplot(hdat) +
 	geom_histogram(aes(x = est_diff), alpha = 0.2) +
 	geom_histogram(aes(x = spo_est), fill = "red", alpha = 0.2) +
@@ -90,44 +109,17 @@ hplot <- ggplot(hdat) +
 
 ggsave("data/output/height_diff.pdf", plot = hplot, width = 15, height = 10, units = "in")
 
-
-print(ggMarginal(ep1, type = "histogram", xparams = list(bins = 50), yparams = list(bins = 50)))
-
+fit <- lm(spo_est ~ con_est, data = hdat)
+summary(fit)
 splot <- ggplot(hdat, aes(x = con_est, y = spo_est)) +
-	geom_point() 
+	geom_point() +
+	geom_abline(intercept = 0, slope = 1, colour = "red") +
+	geom_smooth(method = "lm")
 
 ggsave("data/output/height_diff_scat.pdf", ggMarginal(splot, type = "histogram", xparams = list(bins = 50), yparams = list(bins = 50)))
-
-# CHECK ALLELES
-sp_a1 <- gsub(".*_", "", snps)
-sp_snp <- gsub("_.*", "", snps)
-temp <- data.frame(snp = sp_snp, sp_a1)
-al_check <- temp %>%
-	left_join(height_gwas, by = c("snp" = "SNP")) %>%
-	dplyr::select(snp, sp_a1, A1)
-
-sum(al_check$sp_a1 == al_check$A1)
 
 
 # fin_dat <- res_sig %>%
 # 	left_join(height_gwas, by = c("snp" = "SNP"))
 
-
-
-# use a plot to compare - try forest?
-
-dim(res)
-
-x <- list(x_x = data.frame(x_x_x = 1:10))
-y <- list(y_y = data.frame(y_y_y = 1:10))
-
-z <- list(x, y)
-
-
-fom <- as.formula(paste0("hdiff ~ x + DoB + Sex")
-lm_res <- lm(height_diff ~ rs425277_T + age_diff + Sex, data = dat)
-
-
-str(x)
-lm_res <- lapply(test_diff[, -c(1:13)], function(x) {lm(fom, data = dat)})
 
