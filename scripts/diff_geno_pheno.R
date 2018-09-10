@@ -19,8 +19,7 @@ bim <- read_bim("data/binary/merged_dat")
 # make genotype file
 # ------------------------------------------------
 # If making it for a binary trait then will need to make sure the differences end up as a binary
-for_bin_trait <- FALSE 
-# for_bin_trait <- TRUE
+trait <- "chd"
 
 res <- pairs %>%
 	left_join(dat, by = c("genID" = "FID"))
@@ -32,16 +31,24 @@ gen <- res %>%
 	arrange(Couple) %>%
 	arrange(Sex) # arranging by sex ensures when looking at duplicates you pick out all males/females
 head(gen[, 1:15])
+
+if (is.binary(gen[[trait]])) {
+	gen <- gen %>%
+		arrange(desc(chd)) ### find a way to do this with the trait name!!!
+}
+
 dupval <- duplicated(gen$Couple) # duplicated values = couples
 
 # Extract one from each couple
-gen_c1 <- gen[dupval, ] 
+gen_c1 <- gen[dupval, ]  %>%
+	arrange(Couple)
 colnames(gen_c1[snps]) <- paste0(colnames(gen_c1[snps]), "_c1")
-gen_c2 <- gen[!dupval, ]
+gen_c2 <- gen[!dupval, ] %>%
+	arrange(Couple)
 colnames(gen_c2[snps]) <- paste0(colnames(gen_c2[snps]), "_c2")
-stopifnot(gen_c1$Couple == gen_c2$Couple)
+stopifnot(gen_c1$Couple == gen_c2$Couple) # Checking the couples are in the same order
 
-gen_diff <- gen[dupval, ]
+gen_diff <- gen_c1
 colnames(gen_diff[snps]) <- paste0(colnames(gen_diff[snps]), "_diff")
 
 # Minus gen couple 1 from gen couple 2
@@ -56,10 +63,10 @@ summary(gen_diff[, 14:20])
 # make final difference file
 # ------------------------------------------------
 fin_dat <- gen_diff %>%
-	mutate(height_diff = gen_c1[, "Height"] - gen_c2[, "Height"]) %>%
+	mutate(trait_diff = gen_c1[[trait]] - gen_c2[[trait]]) %>%
 	mutate(age_diff = gen_c1[, "DoB"] - gen_c2[, "DoB"])
 
-write.table(fin_dat, file = "data/differences_dat_height.txt", qu = F, col = T, row = F, sep = "\t")
+write.table(fin_dat, file = paste0("data/differences_dat_", trait, ".txt"), qu = F, col = T, row = F, sep = "\t")
 
 
 
