@@ -18,6 +18,9 @@ bim <- read_bim("data/binary/merged_dat")
 # ------------------------------------------------
 # make genotype file
 # ------------------------------------------------
+# If making it for a binary trait then will need to make sure the differences end up as a binary
+for_bin_trait <- FALSE 
+# for_bin_trait <- TRUE
 
 res <- pairs %>%
 	left_join(dat, by = c("genID" = "FID"))
@@ -54,9 +57,10 @@ summary(gen_diff[, 14:20])
 # ------------------------------------------------
 fin_dat <- gen_diff %>%
 	mutate(height_diff = gen_c1[, "Height"] - gen_c2[, "Height"]) %>%
-	mutate(age_diff = gen_c1[, "DoB"] - gen_c2[, "DoB"]) %>%
-	mutate(chd_diff = gen_c1[, "chd"] - gen_c2[, "chd"])
+	mutate(age_diff = gen_c1[, "DoB"] - gen_c2[, "DoB"])
 
-write.table(fin_dat, file = "data/differences_dat.txt", qu = F, col = T, row = F, sep = "\t")
+write.table(fin_dat, file = "data/differences_dat_height.txt", qu = F, col = T, row = F, sep = "\t")
+
+
 
 
