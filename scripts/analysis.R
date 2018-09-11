@@ -10,7 +10,7 @@ lapply(pkgs, require, character.only = T)
 
 devtools::load_all("~/repos/usefunc/")
 trait <- "chd"
-dat <- read_delim(paste0("data/differences_dat_", trait, ".txt", delim = "\t")
+dat <- read_delim(paste0("data/differences_dat_", trait, ".txt"), delim = "\t")
 
 snps <- grep("rs[0-9]", colnames(dat), value = T)
 
@@ -25,11 +25,13 @@ vars[vars == 0] # rs9825951_A has no variance - removing
 dat <- dplyr::select(dat, -one_of(names(vars[vars==0])))
 snps <- grep("rs[0-9]", colnames(dat), value = T)
 for (i in snps) {
-	fom <- as.formula(paste0(trait, "_diff ~ ", i, " + age_diff + Sex"))
+	fom <- as.formula(paste0("trait_diff ~ ", i, " + age_diff + Sex"))
 	temp <- lm(fom, data = dat)
-	x <- summarise_lm(temp, "height", i)
+	x <- summarise_lm(temp, trait, i)
 	comp_res[[i]] <- x
-	sum_res[[i]] <- x$summary_dat
+	sum_res[[i]] <- x$summary_dat	
+
+	fom <- as.formula(paste0("height_diff..."))
 }
 
 res <- do.call(rbind, sum_res)
@@ -41,7 +43,7 @@ write.table(res, file = paste0(trait, "_spouse_diff_gwas_res.txt"), col.names = 
 
 ################################################
 ##
-##   MAKE BIT BELOW INTO DIFFERENT SCRIPT!!!
+##   MAKE BIT BELOW INTO DIFFERENT SCRIPT!!! ### also make bit above different - hard to get comparison and mr scripts the same
 ##
 ################################################
 

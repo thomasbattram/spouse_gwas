@@ -13,6 +13,7 @@ devtools::load_all("~/repos/usefunc/")
 
 dat <- fread("data/merged_dat_recode.raw", header = T)
 pairs <- read.table("data/spouse_pairs_height_chd.txt", header = T)
+pairs$height <- pairs$Height
 bim <- read_bim("data/binary/merged_dat")
 
 # ------------------------------------------------
@@ -31,7 +32,7 @@ gen <- res %>%
 	arrange(Couple) %>%
 	arrange(Sex) # arranging by sex ensures when looking at duplicates you pick out all males/females
 head(gen[, 1:15])
-
+colnames(res)
 if (is.binary(gen[[trait]])) {
 	gen <- gen %>%
 		arrange(desc(chd)) ### find a way to do this with the trait name!!!
@@ -64,7 +65,8 @@ summary(gen_diff[, 14:20])
 # ------------------------------------------------
 fin_dat <- gen_diff %>%
 	mutate(trait_diff = gen_c1[[trait]] - gen_c2[[trait]]) %>%
-	mutate(age_diff = gen_c1[, "DoB"] - gen_c2[, "DoB"])
+	mutate(age_diff = gen_c1[, "DoB"] - gen_c2[, "DoB"]) %>%
+	mutate(sex_diff = gen_c1[, "Sex"] - gen_c2[, "Sex"])
 
 write.table(fin_dat, file = paste0("data/differences_dat_", trait, ".txt"), qu = F, col = T, row = F, sep = "\t")
 
