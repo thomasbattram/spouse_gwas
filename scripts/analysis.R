@@ -9,7 +9,7 @@ pkgs <- c("tidyverse", "conflicted", "ggExtra")
 lapply(pkgs, require, character.only = T)
 
 devtools::load_all("~/repos/usefunc/")
-trait <- "chd"
+trait <- "height"
 dat <- read_delim(paste0("data/differences_dat_", trait, ".txt"), delim = "\t")
 
 snps <- grep("rs[0-9]", colnames(dat), value = T)
@@ -30,8 +30,6 @@ for (i in snps) {
 	x <- summarise_lm(temp, trait, i)
 	comp_res[[i]] <- x
 	sum_res[[i]] <- x$summary_dat	
-
-	fom <- as.formula(paste0("height_diff..."))
 }
 
 res <- do.call(rbind, sum_res)
@@ -39,7 +37,7 @@ res <- as.data.frame(res) %>%
 	rownames_to_column(var = "snp") %>%
 	mutate(snp = gsub("_[ACTG]", "", snp))
 
-write.table(res, file = paste0(trait, "_spouse_diff_gwas_res.txt"), col.names = T, row.names = F, qu = F, sep = "\t")
+write.table(res, file = paste0("data/", trait, "_spouse_diff_gwas_res.txt"), col.names = T, row.names = F, qu = F, sep = "\t")
 
 ################################################
 ##
