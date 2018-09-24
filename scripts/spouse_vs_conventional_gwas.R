@@ -10,7 +10,6 @@ lapply(pkgs, require, character.only = T)
 
 devtools::load_all("~/repos/usefunc/")
 dat <- read_delim("data/height_spouse_diff_gwas_res.txt", delim = "\t")
-_spouse_diff_gwas_res.txt
 snps <- grep("rs[0-9]", colnames(dat), value = T)
 
 res_sig <- res %>%

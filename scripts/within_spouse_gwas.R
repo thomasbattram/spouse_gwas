@@ -14,6 +14,8 @@ dat <- read_delim(paste0("data/differences_dat_", paste(traits, collapse = "_"),
 
 snps <- grep("rs[0-9]", colnames(dat), value = T)
 
+head(test)
+
 # regress height on SNPs
 i=snps[1]
 comp_res <- list()
