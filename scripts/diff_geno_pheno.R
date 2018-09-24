@@ -39,14 +39,15 @@ if (is.binary(gen[[outcome]])) {
 	gen <- gen %>%
 		arrange(desc(!!! temp))
 }
+# make a list where the couples are randomly mixed 100 times - make sure to have it so the couples are always males and females!!! 
 
 dupval <- duplicated(gen$Couple) # duplicated values = couples
 
 # Extract one from each couple
-gen_c1 <- gen[dupval, ]  %>%
+gen_c1 <- gen[!dupval, ]  %>%
 	arrange(Couple)
 colnames(gen_c1[snps]) <- paste0(colnames(gen_c1[snps]), "_c1")
-gen_c2 <- gen[!dupval, ] %>%
+gen_c2 <- gen[dupval, ] %>%
 	arrange(Couple)
 colnames(gen_c2[snps]) <- paste0(colnames(gen_c2[snps]), "_c2")
 stopifnot(gen_c1$Couple == gen_c2$Couple) # Checking the couples are in the same order
@@ -79,7 +80,7 @@ names(na_num) <- 1:nrow(gen_diff)
 snp_start <- min(grep("rs[0-9]", colnames(gen_diff)))
 rm_dat <- as.numeric(names(na_num[na_num > (ncol(gen_diff) - snp_start) / 10]))
 length(rm_dat)
-gen_diff <- gen_diff[-rm_dat, ]
+#gen_diff <- gen_diff[-rm_dat, ]
 
 # ------------------------------------------------
 # make final difference file
@@ -93,7 +94,7 @@ for (i in traits) {
 	var_nam <- paste0(i, "_diff")
 	fin_dat[[var_nam]] <- gen_c1[[i]] - gen_c2[[i]]
 }
-
+table(fin_dat[["chd_diff"]])
 write.table(fin_dat, file = paste0("data/differences_dat_", paste(traits, collapse = "_"), ".txt"), qu = F, col = T, row = F, sep = "\t")
 
 
