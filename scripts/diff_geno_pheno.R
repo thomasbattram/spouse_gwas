@@ -22,7 +22,6 @@ bim <- read_bim("data/binary/merged_dat")
 # If making it for a binary trait then will need to make sure the differences end up as a binary
 traits <- c("chd", "height")
 outcome <- "chd"
-stopifnot(outcome %in% traits)
 
 res <- pairs %>%
 	left_join(dat, by = c("genID" = "FID"))
@@ -38,7 +37,7 @@ colnames(res)
 if (is.binary(gen[[outcome]])) {
 	temp <- quos(!! sym(outcome))
 	gen <- gen %>%
-		arrange(desc(!!! temp)) ### find a way to do this with the trait name!!!
+		arrange(desc(!!! temp))
 }
 
 dupval <- duplicated(gen$Couple) # duplicated values = couples
