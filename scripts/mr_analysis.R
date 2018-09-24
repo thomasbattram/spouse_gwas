@@ -6,7 +6,7 @@ rm(list = ls())
 
 setwd("~/spouse_gwas")
 
-pkgs <- c("tidyverse", "conflicted", "data.table")
+pkgs <- c("tidyverse", "conflicted", "data.table", "TwoSampleMR", "MRInstruments")
 lapply(pkgs, require, character.only = T)
 
 devtools::load_all("~/repos/usefunc/")
@@ -14,22 +14,75 @@ devtools::load_all("~/repos/usefunc/")
 # ------------------------------------------------
 # read in exposure and outcome data
 # ------------------------------------------------
-exposure <- "height"
+traits <- c("chd", "height")
 outcome <- "chd"
 
-exp_dat <- read_delim(paste0(exposure, "_spouse_diff_gwas_res.txt"), delim = "\t")
-out_dat <- read_delim(paste0(outcome, "_spouse_diff_gwas_res.txt"), delim = "\t")
+dat <- read_delim("data/chd_height_spouse_diff_gwas_res.txt", delim = "\t")
+dat <- read_delim("data/differences_dat_chd_height.txt", delim = "\t")
 
-# extract replicated snps
-exp_dat <- exp_dat %>%
+exp_dat <- dat %>%
+	dplyr::filter(outcome == "height") %>%
 	dplyr::filter(p < 0.05)
 
-out_dat <- out_dat %>%
-	dplyr::filter(snp %in% exp_dat$snp)
+out_dat <- dat %>%
+	dplyr::filter(snp %in% exp_dat$snp) %>%
+	dplyr::filter(outcome == "chd")
+
+# ------------------------------------------------
+# run mr 
+# ------------------------------------------------
+g0 = g[y==0]
+tsps.glm = glm(y~predict(lm(x[y==0]~g0), newdata=list(g0=g)),
+family=binomial)
+beta_tsps = tsps.glm$coef[2]
+se_tsps = summary(tsps.glm)$coef[2,2]
+
+snps <- grep("rs[0-9]", colnames(dat), value = T)
+snp_list <- paste(snps, collapse = "+")
+no_out <- dat %>%
+	dplyr::filter(chd_diff == 0)
+
+tsps.glm <- glm(
+	dat$chd_diff ~ predict(lm(as.formula(paste0("height_diff ~ ", snp_list)), data = no_out), newdata = list(no_out=dat)),
+	family = binomial
+	)
+
+library(sem)
+beta_tsls = tsls(y, cbind(x, rep(1,N)), cbind(g, rep(1,N)),w=rep(1,N))$coef[1]
+se_tsls = sqrt(tsls(y, cbind(x, rep(1,N)), cbind(g, rep(1,N)),
+w=rep(1,N))$V[1,1])
+library(ivpack)
+ivmodel = ivreg(y~x|g, x=TRUE)
+summary(ivmodel)
+beta_tsls = ivreg(y~x|g, x=TRUE)$coef[2]
+se_tsls = summary(ivreg(y~x|g, x=TRUE))$coef[2,2]
 
 mr_wald <- out_dat$estimate / exp_dat$estimate
 
+pdf("data/output/test.pdf")
+hist(mr_wald)
+dev.off()
 
+# ------------------------------------------------
+# read in phenos from mr base
+# ------------------------------------------------
+# needs to be done not on bc because mr fucking base doesn't fucking work on here the fuck
+load("data/giant_height_snps.RData")
+g_height <- x %>%
+	dplyr::filter(pval.exposure < 1e-8) %>%
+	clump_data()
+rm(x)
+
+ao <- available_outcomes()
+ao[grep(paste(c("coronary"), collapse = "|"), ao$trait, ignore.case = T),]
+out <- extract_outcome_data(snps = g_height$SNP, outcomes = 7)
+head(out)
+dat <- harmonise_data(
+    exposure_dat = g_height, 
+    outcome_dat = out
+)
+
+res <- mr(dat)
 
 # 1. Read in both exposure and outcome gwas dat
 # 2. Run the MR analyses - sensitivity analyses? 
