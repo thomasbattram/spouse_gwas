@@ -9,12 +9,10 @@ pkgs <- c("tidyverse", "conflicted", "ggExtra")
 lapply(pkgs, require, character.only = T)
 
 devtools::load_all("~/repos/usefunc/")
-traits <- c("chd", "height")
+traits <-  "height"
 dat <- read_delim(paste0("data/differences_dat_", paste(traits, collapse = "_"), ".txt"), delim = "\t")
 
 snps <- grep("rs[0-9]", colnames(dat), value = T)
-
-head(test)
 
 # regress height on SNPs
 i=snps[1]

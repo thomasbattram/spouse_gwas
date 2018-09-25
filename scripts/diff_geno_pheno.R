@@ -20,8 +20,8 @@ bim <- read_bim("data/binary/merged_dat")
 # make genotype file
 # ------------------------------------------------
 # If making it for a binary trait then will need to make sure the differences end up as a binary
-traits <- c("chd", "height")
-outcome <- "chd"
+traits <- "height"
+outcome <- ""
 
 res <- pairs %>%
 	left_join(dat, by = c("genID" = "FID"))
@@ -39,7 +39,6 @@ if (is.binary(gen[[outcome]])) {
 	gen <- gen %>%
 		arrange(desc(!!! temp))
 }
-# make a list where the couples are randomly mixed 100 times - make sure to have it so the couples are always males and females!!! 
 
 dupval <- duplicated(gen$Couple) # duplicated values = couples
 
@@ -94,7 +93,7 @@ for (i in traits) {
 	var_nam <- paste0(i, "_diff")
 	fin_dat[[var_nam]] <- gen_c1[[i]] - gen_c2[[i]]
 }
-table(fin_dat[["chd_diff"]])
+
 write.table(fin_dat, file = paste0("data/differences_dat_", paste(traits, collapse = "_"), ".txt"), qu = F, col = T, row = F, sep = "\t")
 
 
