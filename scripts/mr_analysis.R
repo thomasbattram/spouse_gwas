@@ -24,9 +24,37 @@ exp_dat <- dat %>%
 	dplyr::filter(outcome == "height") %>%
 	dplyr::filter(p < 0.05)
 
+exp_dat <- format_data(
+	dat = exp_dat,
+	type = "exposure",
+	phenotype_col = "outcome",
+	snp_col = "snp", 
+	beta_col = "estimate", 
+	se_col = "se", 
+	pval_col = "p", 
+	effect_allele_col = "effect_allele", 
+	other_allele_col = "T"
+)
+head(exp_dat)
+
 out_dat <- dat %>%
 	dplyr::filter(snp %in% exp_dat$snp) %>%
 	dplyr::filter(outcome == "chd")
+
+out_dat <- format_data(
+	dat = out_dat,
+	type = "outcome",
+	phenotype_col = "outcome",
+	snp_col = "snp", 
+	beta_col = "estimate", 
+	se_col = "se", 
+	pval_col = "p", 
+	effect_allele_col = "effect_allele",
+	other_allele_col = "T"
+)
+
+dat <- harmonise_data(exp_dat, out_dat, action = 1)
+res <- mr(dat)
 
 # ------------------------------------------------
 # run mr 
@@ -81,7 +109,7 @@ dat <- harmonise_data(
     exposure_dat = g_height, 
     outcome_dat = out
 )
-
+head(dat)
 res <- mr(dat)
 
 # 1. Read in both exposure and outcome gwas dat
