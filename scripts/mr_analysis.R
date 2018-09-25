@@ -53,43 +53,15 @@ out_dat <- format_data(
 	other_allele_col = "T"
 )
 
-dat <- harmonise_data(exp_dat, out_dat, action = 1)
-res <- mr(dat)
 
 # ------------------------------------------------
 # run mr 
 # ------------------------------------------------
-g0 = g[y==0]
-tsps.glm = glm(y~predict(lm(x[y==0]~g0), newdata=list(g0=g)),
-family=binomial)
-beta_tsps = tsps.glm$coef[2]
-se_tsps = summary(tsps.glm)$coef[2,2]
 
-snps <- grep("rs[0-9]", colnames(dat), value = T)
-snp_list <- paste(snps, collapse = "+")
-no_out <- dat %>%
-	dplyr::filter(chd_diff == 0)
-
-tsps.glm <- glm(
-	dat$chd_diff ~ predict(lm(as.formula(paste0("height_diff ~ ", snp_list)), data = no_out), newdata = list(no_out=dat)),
-	family = binomial
-	)
-
-library(sem)
-beta_tsls = tsls(y, cbind(x, rep(1,N)), cbind(g, rep(1,N)),w=rep(1,N))$coef[1]
-se_tsls = sqrt(tsls(y, cbind(x, rep(1,N)), cbind(g, rep(1,N)),
-w=rep(1,N))$V[1,1])
-library(ivpack)
-ivmodel = ivreg(y~x|g, x=TRUE)
-summary(ivmodel)
-beta_tsls = ivreg(y~x|g, x=TRUE)$coef[2]
-se_tsls = summary(ivreg(y~x|g, x=TRUE))$coef[2,2]
-
-mr_wald <- out_dat$estimate / exp_dat$estimate
-
-pdf("data/output/test.pdf")
-hist(mr_wald)
-dev.off()
+dat <- harmonise_data(exp_dat, out_dat, action = 1)
+res <- mr(dat)
+scat <- mr_scatter_plot(res, dat)
+ggsave("data/output/mr_chd_height_scatter.pdf", plot = scat[[1]])
 
 # ------------------------------------------------
 # read in phenos from mr base
