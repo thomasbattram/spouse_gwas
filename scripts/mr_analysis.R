@@ -18,7 +18,7 @@ traits <- c("chd", "height")
 outcome <- "chd"
 
 dat <- read_delim("data/chd_height_spouse_diff_gwas_res.txt", delim = "\t")
-dat <- read_delim("data/differences_dat_chd_height.txt", delim = "\t")
+# dat <- read_delim("data/differences_dat_chd_height.txt", delim = "\t")
 
 exp_dat <- dat %>%
 	dplyr::filter(outcome == "height") %>%
@@ -38,7 +38,7 @@ exp_dat <- format_data(
 head(exp_dat)
 
 out_dat <- dat %>%
-	dplyr::filter(snp %in% exp_dat$snp) %>%
+	dplyr::filter(snp %in% exp_dat$SNP) %>%
 	dplyr::filter(outcome == "chd")
 
 out_dat <- format_data(
@@ -52,7 +52,6 @@ out_dat <- format_data(
 	effect_allele_col = "effect_allele",
 	other_allele_col = "T"
 )
-
 
 # ------------------------------------------------
 # run mr 

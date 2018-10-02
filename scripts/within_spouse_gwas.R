@@ -37,7 +37,8 @@ for (j in traits) {
 			x <- summarise_glm(temp, j, i)
 		} else {
 			temp <- lm(fom, data = dat)
-			x <- summarise_lm(temp, j, i) %>%
+			x <- summarise_lm(temp, j, i)
+			x$summary_dat <- x$summary_dat %>%
 				dplyr::select(-adj_r2)
 		}
 		comp_res[[i]] <- x
